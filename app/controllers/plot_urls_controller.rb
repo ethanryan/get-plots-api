@@ -7,6 +7,9 @@ class PlotUrlsController < ApplicationController
   def create
     plot_url = PlotUrl.new(plot_url_params)
     plot_url.save
+    link = plot_url.link
+    plot_url.parse_that_ish(link)
+    render json: plot_url
   end
 
   def plot_url_params
