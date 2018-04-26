@@ -2,7 +2,9 @@ class PlotUrl < ApplicationRecord
 
 
   p = PlotUrl.new
-  link = "https://en.wikipedia.org/wiki/The_Shining_(film)"
+  link_1 = "https://en.wikipedia.org/wiki/The_Shining_(film)"
+
+  link_2 = "https://en.wikipedia.org/wiki/Home_Alone"
   #p.parseHTML(link)
 
 
@@ -31,14 +33,33 @@ class PlotUrl < ApplicationRecord
     #note: css returns a set with all the matching selector's elements in the DOM,
     #while at_css returns only the first matching element of the set
 
-    #pry <<<<--------pry works! keep on prying...
+    plot_header = doc.at_css('[id="Plot"]')
+    puts "plot_header is: " + plot_header #this is the second H2 on the page: Plot
 
-    plot_para_1 = doc.css('p')[7].children.text #need to abstract this...
+    cast_header = doc.at_css('[id="Cast"]')
+    puts "cast_header is: " + cast_header
+
+    # from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
+
+    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
+
+    plot_text = intersection.to_s.split('Plot[edit]')[1]
+    self.plot = plot_text
+
+    #plot_para_1 = doc.css('p')[7].children.text #need to abstract this...
     #this won't always be the 8th paragraph on the page...
+    #puts "plot_para_1 is: " + plot_para_1
 
-    puts "plot_para_1 is: " + plot_para_1
+    #try plot_header.next ?!?!?!
+    plot_para_1 = plot_header.parent.next_element #the parent of H2 Plot's next element is first paragraph of plot...
 
-    self.plot = plot_para_1
+    plot_para_2 = plot_para_1.next_element
+
+    #when does this end??? how do i abstract this... won't always be same number of paragraphs...
+
+    byebug #<<<<-------- byebug works! keep on byebubbing...
+
+    #self.plot = plot_para_1
 
     self.save
   end
