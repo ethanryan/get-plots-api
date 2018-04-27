@@ -5,8 +5,10 @@ class PlotUrl < ApplicationRecord
   link_1 = "https://en.wikipedia.org/wiki/The_Shining_(film)"
 
   link_2 = "https://en.wikipedia.org/wiki/Home_Alone"
-  #p.parseHTML(link)
 
+  link_3 = "https://en.wikipedia.org/wiki/El_Topo"
+
+  #p.parseHTML(link)
 
 
   def parseHTML(link)
@@ -39,37 +41,45 @@ class PlotUrl < ApplicationRecord
     cast_header = doc.at_css('[id="Cast"]')
     puts "cast_header is: " + cast_header
 
-    # from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
-    #this works, but is slow... see if there's a faster way...
+#    from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
+#    this works, but is slow... see if there's a faster way...
 #    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
-
 #    plot_text = intersection.to_s.split('Plot[edit]')[1]
 #    self.plot = plot_text
 
-    #plot_para_1 = doc.css('p')[7].children.text #need to abstract this...
-    #this won't always be the 8th paragraph on the page...
-    #puts "plot_para_1 is: " + plot_para_1
+    the_first = plot_header.parent #plot comes after H2 Plot
+    the_last = cast_header.parent #plot comes before H2 Cast
 
-    #try plot_header.next ?!?!?!
-    plot_para_1 = plot_header.parent.next_element #the parent of H2 Plot's next element is first paragraph of plot...
+    plot_array = collect_between(the_first, the_last)
+    plot_array.shift #remove "Plot[edit]" from plot_array
+    plot_array.pop #remove "Cast[edit]" from plot_array
 
-    plot_para_2 = plot_para_1.next_element
+    plot_array = plot_array.map { |element| "text: " + element.text  } #keep working on this, maybe make another method that gets called...
 
-    self.plot = plot_para_1
+    puts "plot_array contains: " #wanna check it out in the console, but don't need this...
+    plot_array.map { |element| puts element }
 
-    #when does this end??? how do i abstract this... won't always be same number of paragraphs...
+    #self.save  #this will save each created plot to the database...
+    file_name = title
+    file_content = plot_array
+    create_file(file_name, file_content) #calling method below with two arguments
 
     #byebug #<<<<-------- byebug works! keep on byebubbing...
-
-    self.save
-    file_name = title
-    file_content = plot_para_1 #for now, just testing...
-    create_file(file_name, file_content)
   end
 
 
-#get this working and call at end of function above...
+  #got this from here: https://stackoverflow.com/questions/820066/nokogiri-select-content-between-element-a-and-b
+  def collect_between(first, last)
+    puts "calling collect_between..."
+    result = [first]
+    until first == last
+      first = first.next_element
+      result << first
+    end
+    result
+  end
 
+  #calling at end of function above...
   def create_file(file_name, file_content)
     require 'fileutils'
     file_name = file_name + ".rb"
@@ -81,33 +91,10 @@ class PlotUrl < ApplicationRecord
   end
 
 
-
   #function to call from controller, to call function above...
   def parse_that_ish(link)
     self.parseHTML(link)
     self.save
   end
 
-  # def example
-  #   require 'open-uri'
-  #
-  #   doc = Nokogiri::HTML(open('http://www.nokogiri.org/tutorials/installing_nokogiri.html'))
-  #
-  #   puts "### Search for nodes by css"
-  #   doc.css('nav ul.menu li a', 'article h2').each do |link|
-  #     puts link.content
-  #   end
-  #
-  #   puts "### Search for nodes by xpath"
-  #   doc.xpath('//nav//ul//li/a', '//article//h2').each do |link|
-  #     puts link.content
-  #   end
-  #
-  #   puts "### Or mix and match."
-  #   doc.search('nav ul.menu li a', '//article//h2').each do |link|
-  #     puts link.content
-  #   end
-  #
-  # end
-
-end
+end #end of class
