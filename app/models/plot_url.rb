@@ -40,11 +40,11 @@ class PlotUrl < ApplicationRecord
     puts "cast_header is: " + cast_header
 
     # from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
+    #this works, but is slow... see if there's a faster way...
+#    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
 
-    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
-
-    plot_text = intersection.to_s.split('Plot[edit]')[1]
-    self.plot = plot_text
+#    plot_text = intersection.to_s.split('Plot[edit]')[1]
+#    self.plot = plot_text
 
     #plot_para_1 = doc.css('p')[7].children.text #need to abstract this...
     #this won't always be the 8th paragraph on the page...
@@ -55,14 +55,32 @@ class PlotUrl < ApplicationRecord
 
     plot_para_2 = plot_para_1.next_element
 
+    self.plot = plot_para_1
+
     #when does this end??? how do i abstract this... won't always be same number of paragraphs...
 
-    byebug #<<<<-------- byebug works! keep on byebubbing...
-
-    #self.plot = plot_para_1
+    #byebug #<<<<-------- byebug works! keep on byebubbing...
 
     self.save
+    file_name = title
+    file_content = plot_para_1 #for now, just testing...
+    create_file(file_name, file_content)
   end
+
+
+#get this working and call at end of function above...
+
+  def create_file(file_name, file_content)
+    require 'fileutils'
+    file_name = file_name + ".rb"
+    somefile = File.open(file_name, "w")
+    somefile.puts file_content
+    somefile.close
+    puts "created file..."
+    return "created file...!!!!!"
+  end
+
+
 
   #function to call from controller, to call function above...
   def parse_that_ish(link)
