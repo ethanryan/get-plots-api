@@ -50,11 +50,26 @@ class PlotUrl < ApplicationRecord
     the_first = plot_header.parent #plot comes after H2 Plot
     the_last = cast_header.parent #plot comes before H2 Cast
 
-    plot_array = collect_between(the_first, the_last)
+    plot_array = collect_between(the_first, the_last) #calling method below, to get all plot paragraphs
     plot_array.shift #remove "Plot[edit]" from plot_array
     plot_array.pop #remove "Cast[edit]" from plot_array
 
-    plot_array = plot_array.map { |element| "text: " + element.text  } #keep working on this, maybe make another method that gets called...
+    # plot_array = plot_array.map.with_index do |element, index|
+    #   "index: " + index.to_s
+    #   "text: " + element.text
+    # end #keep working on this, maybe make another method that gets called...
+
+    plot_array = plot_array.map.with_index do |element, index|
+      order = index + 1
+      text = element.text
+      result = Hash.new
+      result["plot_id"] = "null"
+      result["order"] = order
+      result["text"] = text
+      puts "result is: "
+      puts result
+      result.to_json #this will convert from {'key' => 'value'} form to {key: "value"} form!
+    end
 
     puts "plot_array contains: " #wanna check it out in the console, but don't need this...
     plot_array.map { |element| puts element }
