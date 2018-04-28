@@ -71,15 +71,19 @@ class PlotUrl < ApplicationRecord
       result.to_json #this will convert from {'key' => 'value'} form to {key: "value"} form!
     end
 
-    puts "plot_array contains: " #wanna check it out in the console, but don't need this...
-    plot_array.map { |element| puts element }
+    plot_array = plot_array.map{|h| Array.new << h} #put each hash in an array, making plot_array an array of arrays, each with one hash...
+
+    array1 = Array.new
+    array1 << plot_array #nesting plot_array in an array........
+    #puts "plot_array contains: " #wanna check it out in the console, but don't need this...
+    #plot_array.map { |element| puts element }
 
     #self.save  #this will save each created plot to the database...
-    file_name = title
-    file_content = plot_array
-    create_file(file_name, file_content) #calling method below with two arguments
+    #file_name = title
+    #file_content = plot_array
+    create_file(title, array1) #calling method below with two arguments
 
-    #byebug #<<<<-------- byebug works! keep on byebubbing...
+    byebug #<<<<-------- byebug works! keep on byebubbing...
   end
 
 
@@ -98,8 +102,8 @@ class PlotUrl < ApplicationRecord
   def create_file(file_name, file_content)
     require 'fileutils'
     file_name = file_name + ".rb"
-    somefile = File.open(file_name, "w")
-    somefile.puts file_content
+    somefile = File.open(file_name, "w") #File.open is same as File.new, it creates a new file...
+    somefile.puts file_content.join(",") #adding comma to end of each hash, now just need to put it all in brackets! <<<<-----!!!!!
     somefile.close
     puts "created file..."
     return "created file...!!!!!"
