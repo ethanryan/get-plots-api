@@ -103,8 +103,10 @@ class PlotUrl < ApplicationRecord
     require 'fileutils'
     file_name = file_name + ".rb"
     somefile = File.open(file_name, "w") #File.open is same as File.new, it creates a new file...
+    comment = "#select array within Paragraph.create(), then click: Packages > Pretty JSON > Prettify\n"
     file_content = file_content.join(",")
-    file_content = "paragraphs = Paragraph.create([" + file_content + "]"
+    file_content = "paragraphs = Paragraph.create([" + file_content + "])"
+    file_content = comment + file_content
     #adding comma to end of each hash, now just need to put it all in brackets! <<<<-----!!!!!
     somefile.puts file_content
     somefile.close
