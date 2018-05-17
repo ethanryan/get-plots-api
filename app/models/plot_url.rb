@@ -42,7 +42,7 @@ class PlotUrl < ApplicationRecord
     plot_header = doc.at_css('[id="Plot"]')
     puts "plot_header is: " + plot_header #this is the second H2 on the page: Plot
 
-    cast_header = doc.at_css('[id="Cast"]') || doc.at_css('[id="Voice_cast"]')
+    cast_header = doc.at_css('[id="Cast"]') || doc.at_css('[id="Voice_cast"]') || doc.at_css('[id="Characters"]')
     puts "cast_header is: " + cast_header
 
 #    from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
