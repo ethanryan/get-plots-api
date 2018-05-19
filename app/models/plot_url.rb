@@ -105,12 +105,18 @@ class PlotUrl < ApplicationRecord
     comment_1 = "#select array within Plot.create(), then click: Packages > Pretty JSON > Prettify\n"
     plot_content = "plot = Plot.create([{\"genre_id\": \"null\", \"title\": \"#{file_name}\", \"author\": \"null\"}])\n\n" #note: need to escape all double quotes within double quotes, for interpolated file name, and need double quotes for all key values anyway
 
-    comment_2 = "#select array within Paragraph.create(), then click: Packages > Pretty JSON > Prettify\n"
+    comment_2 = "#note: when adding new plots, need to redo do each plot's ID\n
+#seeding database will give each plot an id, from first folder to last folder\n
+#so Halloween will be plot ID #1, because it's the first plot in the first folder.\n
+#ALSO: need to figure out how to reseed plots without deleting all users, and all their stories!!!\n
+#need to JUST drop Plots table, and then migrate / seed Plots table.\n\n"
+
+    comment_3 = "#select array within Paragraph.create(), then click: Packages > Pretty JSON > Prettify\n"
 
     paragraph_content = file_content.join(",")
     paragraph_content = "paragraphs = Paragraph.create([" + paragraph_content + "])"
 
-    final_file_content = comment_1 + plot_content + comment_2 + paragraph_content
+    final_file_content = comment_1 + plot_content + comment_2 + comment_3 + paragraph_content
     #adding comma to end of each hash, now just need to put it all in brackets! <<<<-----!!!!!
     somefile.puts final_file_content
     somefile.close
