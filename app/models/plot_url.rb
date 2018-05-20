@@ -63,8 +63,9 @@ class PlotUrl < ApplicationRecord
     plot_array = plot_array.map.with_index do |element, index|
       order = index + 1
       text = element.text
+      plot_id = "# {plot.first.id} <--------- delete space between # and { ..." #this will be referencing the Plot array created on line 1 of each seed file...
       result = Hash.new
-      result["plot_id"] = "null"
+      result["plot_id"] = plot_id
       result["order"] = order
       result["text"] = text
       puts "result is: "
