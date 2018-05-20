@@ -63,7 +63,7 @@ class PlotUrl < ApplicationRecord
     plot_array = plot_array.map.with_index do |element, index|
       order = index + 1
       text = element.text
-      plot_id = "# {plot.first.id} <--------- delete space between # and { ..." #this will be referencing the Plot array created on line 1 of each seed file...
+      plot_id = "\#{plot.first.id}" #this will be referencing the Plot array created on line 1 of each seed file, note: need to escape the # with a backslash to keep Ruby from interpolating the #{} stuff right away
       result = Hash.new
       result["plot_id"] = plot_id
       result["order"] = order
