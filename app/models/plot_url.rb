@@ -58,21 +58,7 @@ class PlotUrl < ApplicationRecord
     plot_array.shift #remove "Plot[edit]" from plot_array
     plot_array.pop #remove "Cast[edit]" from plot_array
 
-    #maybe make another method that gets called for below...
-
-    plot_array = plot_array.map.with_index do |element, index|
-      order = index + 1
-      text = element.text
-      new_text = all_caps_if_proper_noun(text) #calling helper function below, making proper nouns ALLCAPS
-      plot_id = "\#{plot.first.id}" #this will be referencing the Plot array created on line 1 of each seed file, note: need to escape the # with a backslash to keep Ruby from interpolating the #{} stuff right away
-      result = Hash.new
-      result["plot_id"] = plot_id
-      result["order"] = order
-      result["text"] = new_text
-      puts "result is: "
-      puts result
-      result.to_json #this will convert from {'key' => 'value'} form to {key: "value"} form!
-    end
+    plot_array = reformat_plot_array(plot_array) #calling method below with one argument...
 
     plot_array = plot_array.map{|h| Array.new << h} #put each hash in an array, making plot_array an array of arrays, each with one hash...
     self.plot = plot_array
@@ -127,6 +113,24 @@ class PlotUrl < ApplicationRecord
   end
 
 
+  #helper function, calling after getting plot_array above... this is an imporant step!
+  def reformat_plot_array(plot_array)
+    plot_array = plot_array.map.with_index do |element, index|
+      order = index + 1
+      text = element.text
+      new_text = all_caps_if_proper_noun(text) #calling helper function below, making proper nouns ALLCAPS
+      plot_id = "\#{plot.first.id}" #this will be referencing the Plot array created on line 1 of each seed file, note: need to escape the # with a backslash to keep Ruby from interpolating the #{} stuff right away
+      result = Hash.new
+      result["plot_id"] = plot_id
+      result["order"] = order
+      result["text"] = new_text
+      puts "result is: "
+      puts result
+      result.to_json #this will convert from {'key' => 'value'} form to {key: "value"} form!
+    end
+    return plot_array
+  end
+
 
   #helper function, converting proper nouns to ALLCAPS, passing a sentence sting as an argument, returning a string
   def all_caps_if_proper_noun(string)
@@ -141,7 +145,7 @@ class PlotUrl < ApplicationRecord
     return new_sentence_string
   end
   #example of how to call this function: all_caps_if_proper_noun(sentence_string)
-  
+
 
   #function to call from controller, to call function above...
   def parse_that_ish(link)
