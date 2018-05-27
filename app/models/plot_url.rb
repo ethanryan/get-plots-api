@@ -45,11 +45,11 @@ class PlotUrl < ApplicationRecord
     cast_header = doc.at_css('[id="Cast"]') || doc.at_css('[id="Voice_cast"]') || doc.at_css('[id="Characters"]')
     puts "cast_header is: " + cast_header
 
-#    from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
-#    this works, but is slow... see if there's a faster way...
-#    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
-#    plot_text = intersection.to_s.split('Plot[edit]')[1]
-#    self.plot = plot_text
+    #    from stack overflow: https://stackoverflow.com/questions/24193807/nokogiri-and-xpath-find-all-text-between-two-tags
+    #    this works, but is slow... see if there's a faster way...
+    #    intersection = doc.xpath('//h2[2]/preceding::text()[ count( . | //h2[1]/following::text()) = count(//h2[1]/following::text()) ]')
+    #    plot_text = intersection.to_s.split('Plot[edit]')[1]
+    #    self.plot = plot_text
 
     the_first = plot_header.parent #plot comes after H2 Plot
     the_last = cast_header.parent #plot comes before H2 Cast
@@ -63,11 +63,12 @@ class PlotUrl < ApplicationRecord
     plot_array = plot_array.map.with_index do |element, index|
       order = index + 1
       text = element.text
+      new_text = all_caps_if_proper_noun(text) #calling helper function below, making proper nouns ALLCAPS
       plot_id = "\#{plot.first.id}" #this will be referencing the Plot array created on line 1 of each seed file, note: need to escape the # with a backslash to keep Ruby from interpolating the #{} stuff right away
       result = Hash.new
       result["plot_id"] = plot_id
       result["order"] = order
-      result["text"] = text
+      result["text"] = new_text
       puts "result is: "
       puts result
       result.to_json #this will convert from {'key' => 'value'} form to {key: "value"} form!
@@ -107,10 +108,10 @@ class PlotUrl < ApplicationRecord
     plot_content = "plot = Plot.create([{\"genre_id\": \"null\", \"title\": \"#{file_name}\", \"author\": \"null\"}])\n\n" #note: need to escape all double quotes within double quotes, for interpolated file name, and need double quotes for all key values anyway
 
     comment_2 = "#note: when adding new plots, need to redo do each plot's ID\n
-#seeding database will give each plot an id, from first folder to last folder\n
-#so Halloween will be plot ID #1, because it's the first plot in the first folder.\n
-#ALSO: need to figure out how to reseed plots without deleting all users, and all their stories!!!\n
-#need to JUST drop Plots table, and then migrate / seed Plots table.\n\n"
+    #seeding database will give each plot an id, from first folder to last folder\n
+    #so Halloween will be plot ID #1, because it's the first plot in the first folder.\n
+    #ALSO: need to figure out how to reseed plots without deleting all users, and all their stories!!!\n
+    #need to JUST drop Plots table, and then migrate / seed Plots table.\n\n"
 
     comment_3 = "#select array within Paragraph.create(), then click: Packages > Pretty JSON > Prettify\n"
 
@@ -125,6 +126,22 @@ class PlotUrl < ApplicationRecord
     return "created file...!!!!!"
   end
 
+
+
+  #helper function, converting proper nouns to ALLCAPS, passing a sentence sting as an argument, returning a string
+  def all_caps_if_proper_noun(string)
+    sentence = string.split(" ") #turns string into array
+    new_sentence = sentence.map do |word|
+      if word[0] === word[0].upcase #if first letter of word is uppercase...
+        then word = word.upcase #then make that whole word uppercase...
+      else word = word #else, keep the word as it is
+      end
+    end
+    new_sentence_string = new_sentence.join(" ") #turn array into a string
+    return new_sentence_string
+  end
+  #example of how to call this function: all_caps_if_proper_noun(sentence_string)
+  
 
   #function to call from controller, to call function above...
   def parse_that_ish(link)
